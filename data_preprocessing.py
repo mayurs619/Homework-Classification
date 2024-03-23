@@ -7,6 +7,7 @@ import shutil
 def convert_to_jpg(directory, target_directory):
     heic_files = [f for f in os.listdir(directory) if f.lower().endswith('.heic')]
 
+    # convert heic files to png and save to the same folder
     for filename in heic_files:
         file_path = os.path.join(directory, filename)
         if os.path.exists(file_path.removesuffix('HEIC').removesuffix('heic') + 'png'):
@@ -16,14 +17,12 @@ def convert_to_jpg(directory, target_directory):
         heic_img.save()
         print("\tsaved {} to png".format(filename))
 
+    # convert png files to jpg and save them to the dest folder
     ImageFile.LOAD_TRUNCATED_IMAGES = True
     png_files = [f for f in os.listdir(directory) if f.lower().endswith('.png')]
-    png_files.sort()
-    count = 0
     for filename in png_files:
         file_path = os.path.join(directory, filename)
-        new_file_path = os.path.join(target_directory, "IMG_{}.jpg".format(count))
-        count += 1
+        new_file_path = os.path.join(target_directory, filename.removesuffix('png') + 'jpg')
         if os.path.exists(new_file_path):
             continue
 
@@ -32,12 +31,12 @@ def convert_to_jpg(directory, target_directory):
         img.save(new_file_path)
         print("\tsaved {} to jpg".format(filename))
 
+    # move any jpg files in src folder to dest folder
     jpg_files = [f for f in os.listdir(directory) if f.lower().endswith('.jpg')]
     jpg_files.sort()
     for filename in jpg_files:
         file_path = os.path.join(directory, filename)
-        new_file_path = os.path.join(target_directory, "IMG_{}.jpg".format(count))
-        count += 1
+        new_file_path = os.path.join(target_directory, filename)
         if os.path.exists(new_file_path):
             continue
         shutil.copyfile(file_path, new_file_path)
@@ -46,7 +45,9 @@ if not os.path.exists('data/hw'):
     os.mkdir('data/hw')
 if not os.path.exists('data/no_hw'):
     os.mkdir('data/no_hw')
-    
-convert_to_jpg('data/raw_hw', 'data/hw')
-convert_to_jpg('data/raw_no_hw', 'data/no_hw')
 
+for directory_name in os.listdir('data/raw_hw'):
+    convert_to_jpg(os.path.join('data/raw_hw', directory_name), 'data/hw')
+
+for directory_name in os.listdir('data/raw_no_hw'):
+    convert_to_jpg(os.path.join('data/raw_no_hw', directory_name), 'data/no_hw')
