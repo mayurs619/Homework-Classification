@@ -22,12 +22,14 @@ def convert_to_jpg(directory, target_directory):
     png_files = [f for f in os.listdir(directory) if f.lower().endswith('.png')]
     for filename in png_files:
         file_path = os.path.join(directory, filename)
-        new_file_path = os.path.join(target_directory, filename.removesuffix('png') + 'jpg')
+        new_file_path = os.path.join(target_directory, filename.removesuffix('png').removesuffix('PNG') + 'jpg')
         if os.path.exists(new_file_path):
             continue
 
         print("saving {} to jpg:".format(filename))
         img = Image.open(file_path, mode='r')
+        if img.mode == "RGBA":
+            img = img.convert('RGB')
         img.save(new_file_path)
         print("\tsaved {} to jpg".format(filename))
 
@@ -47,7 +49,15 @@ if not os.path.exists('data/no_hw'):
     os.mkdir('data/no_hw')
 
 for directory_name in os.listdir('data/raw_hw'):
-    convert_to_jpg(os.path.join('data/raw_hw', directory_name), 'data/hw')
+    src = os.path.join('data/raw_hw', directory_name)
+    dst = os.path.join('data/hw', directory_name)
+    if not os.path.exists(dst):
+        os.mkdir(dst)
+    convert_to_jpg(src, dst)
 
 for directory_name in os.listdir('data/raw_no_hw'):
-    convert_to_jpg(os.path.join('data/raw_no_hw', directory_name), 'data/no_hw')
+    src = os.path.join('data/raw_no_hw', directory_name)
+    dst = os.path.join('data/no_hw', directory_name)
+    if not os.path.exists(dst):
+        os.mkdir(dst)
+    convert_to_jpg(src, dst)
