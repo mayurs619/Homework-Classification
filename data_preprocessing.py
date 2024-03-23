@@ -28,7 +28,7 @@ def convert_to_jpg(directory, target_directory):
 
         print("saving {} to jpg:".format(filename))
         img = Image.open(file_path, mode='r')
-        if img.mode == "RGBA":
+        if img.mode == "RGBA" or img.mode == 'P':
             img = img.convert('RGB')
         img.save(new_file_path)
         print("\tsaved {} to jpg".format(filename))
