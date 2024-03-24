@@ -48,10 +48,7 @@ def upload_file():
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
             full_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
             pred = predict_image(full_path)
-            if pred == "0.0":
-                prediction = "Homework"
-            else:
-                prediction = "Not Homework"
+            prediction = "Homework" if (pred < 0.5) else "Not Homework"
             image_data = encode_image(full_path)
             predictions.append(prediction)
             image_data_list.append(image_data)
@@ -61,21 +58,20 @@ def upload_file():
     return jsonify({'predictions': predictions, 'image_data_list': image_data_list})
 
 def predict_image(image_path):
-    loaded_knn = pickle.load(open('knn_classifier.pkl', 'rb'))
-    #loaded_cnn = keras.models.load_model('cnn_classifier_128.keras')
+    loaded_cnn = keras.models.load_model('cnn_classifier_128.keras')
     pic = np.array([preprocess_image(image_path)])
-    y_pred = loaded_knn.predict(pic)
-    return str(y_pred[0])
+    y_pred = loaded_cnn.predict(pic)
+    return y_pred[0][0]
 
 def encode_image(image_path):
     with open(image_path, "rb") as img_file:
         encoded_image = base64.b64encode(img_file.read()).decode('utf-8')
     return encoded_image
 
-def preprocess_image(image_path, target_size=(32, 32)):
+def preprocess_image(image_path, target_size=(128, 128)):
     image = io.imread(image_path)
     image = color.rgb2gray(image)  # Convert to grayscale
-    return cv2.resize(image, target_size).flatten()
+    return cv2.resize(image, target_size)
 
 if __name__ == '__main__':
     app.run(debug=True)
