@@ -4,6 +4,7 @@ from skimage import io, color, transform
 import os
 import cv2
 import pickle
+import base64
 
 app = Flask(__name__)
 UPLOAD_FOLDER = 'uploads'
@@ -32,8 +33,13 @@ def upload_file():
         filename = file.filename
         file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
         full_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-        prediction = predict_image(full_path)
-        return jsonify({'prediction': prediction})
+        pred = predict_image(full_path)
+        if(pred == "0.0"):
+            prediction = "Homework"
+        else:
+            prediction = "Not Homework"
+        image_data = encode_image(full_path)
+        return jsonify({'prediction': prediction, 'image': image_data})
     else:
         return jsonify({'error': 'Invalid file format. Please upload an image (png, jpg, jpeg, gif)'})
 
@@ -42,6 +48,11 @@ def predict_image(image_path):
     pic = np.array([preprocess_image(image_path)])
     y_pred = loaded_knn.predict(pic)
     return str(y_pred[0])
+
+def encode_image(image_path):
+    with open(image_path, "rb") as img_file:
+        encoded_image = base64.b64encode(img_file.read()).decode('utf-8')
+    return encoded_image
 
 def preprocess_image(image_path, target_size=(32, 32)):
     image = io.imread(image_path)

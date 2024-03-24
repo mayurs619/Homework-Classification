@@ -65,9 +65,23 @@
             background-color: #45a049;
         }
 
-        #prediction, #error {
+        .result-container {
+            text-align: center;
             margin-top: 20px;
+        }
+
+        #prediction {
             font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        #uploadedImageContainer {
+            display: none; /* Hide the container by default */
+        }
+
+        #uploadedImage {
+            max-width: 100%;
+            height: auto;
         }
     </style>
 </head>
@@ -80,7 +94,13 @@
             <input type="file" id="fileInput">
             <button id="uploadBtn">Upload</button>
         </div>
-        <div id="prediction"></div>
+        <div class="result-container">
+            <div id="prediction"></div>
+            <div id="uploadedImageContainer">
+                <!-- Display uploaded image here -->
+                <img id="uploadedImage" src="" alt="Uploaded Image">
+            </div>
+        </div>
         <div id="error"></div>
     </div>
 
@@ -99,13 +119,20 @@
                     contentType: false,
                     processData: false,
                     success: function(response){
+                        // Display prediction
                         $('#prediction').text('Prediction: ' + response.prediction);
                         $('#error').text('');
+
+                        // Display uploaded image
+                        $('#uploadedImage').attr('src', 'data:image/jpeg;base64,' + response.image);
+                        $('#uploadedImageContainer').show(); // Show the image container
                     },
                     error: function(xhr, status, error){
                         var errorMessage = xhr.responseJSON.error;
                         $('#prediction').text('');
                         $('#error').text(errorMessage);
+                        $('#uploadedImage').attr('src', ''); // Clear image src on error
+                        $('#uploadedImageContainer').hide(); // Hide the image container on error
                     }
                 });
             });
