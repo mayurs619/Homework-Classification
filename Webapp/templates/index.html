@@ -44,12 +44,14 @@
         
         /* Hide the default file input */
         #fileInput {
-            display: none;
+            position: absolute;
+            left: -9999px;
         }
         
         .file-label:hover {
             background-color: #45a049;
         }
+            
         
         button {
             background-color: #4CAF50;
@@ -99,9 +101,9 @@
     <div class="container">
         <h1>Upload Images</h1>
         <div class="upload-section">
-            <label for="fileInput" class="file-label">Choose file(s)</label>
-            <input type="file" id="fileInput" multiple> <!-- Allow multiple file selection -->
-            <button id="uploadBtn">Upload</button>
+            <label for="fileInput" class="file-label">Choose file(s) <span id="fileCountLabel">0 files selected</span></label>
+            <input type="file" id="fileInput" multiple onchange="updateFileLabel()"> <!-- Allow multiple file selection -->
+            <button id="uploadBtn">Submit</button>
         </div>
         <div id="error"></div> <!-- Display error message here -->
         <div class="result-container" id="imageCardsContainer">
@@ -109,6 +111,16 @@
         </div>
     </div>
     <script>
+        function updateFileLabel() {
+            var fileInput = document.getElementById('fileInput');
+            var fileCountLabel = document.getElementById('fileCountLabel');
+            if (fileInput.files.length === 1) {
+                fileCountLabel.textContent = '1 file selected';
+            } else {
+                fileCountLabel.textContent = fileInput.files.length + ' files selected';
+            }
+        }
+
         $(document).ready(function(){
             $('#uploadBtn').click(function(){
                 var files = document.getElementById('fileInput').files; // Get the list of selected files
@@ -158,6 +170,5 @@
             });
         });
     </script>
-    
 </body>
 </html>
