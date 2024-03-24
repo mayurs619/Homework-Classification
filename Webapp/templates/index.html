@@ -6,34 +6,30 @@
     <title>Image Upload</title>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <style>
+        /* Base styles for all devices */
         body {
             font-family: Arial, sans-serif;
             background-color: #f4f4f4;
         }
-
+        
         .container {
-            max-width: 600px;
+            max-width: 90%; /* Use a percentage for maximum width */
             margin: 0 auto;
             padding: 20px;
             background-color: #fff;
             border-radius: 5px;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
         }
-
+        
         h1 {
             text-align: center;
             margin-bottom: 20px;
         }
-
+        
         .upload-section {
             margin-bottom: 20px;
         }
-
-        /* Styling for the file input */
-        #fileInput {
-            display: none;
-        }
-
+        
         .file-label {
             background-color: #4CAF50;
             color: white;
@@ -45,11 +41,16 @@
             display: inline-block;
             margin-bottom: 10px;
         }
-
+        
+        /* Hide the default file input */
+        #fileInput {
+            display: none;
+        }
+        
         .file-label:hover {
             background-color: #45a049;
         }
-
+        
         button {
             background-color: #4CAF50;
             color: white;
@@ -60,28 +61,28 @@
             transition: background-color 0.3s;
             display: block;
         }
-
+        
         button:hover {
             background-color: #45a049;
         }
-
+        
         .result-container {
             text-align: center;
             margin-top: 20px;
         }
-
+        
         #prediction {
             font-weight: bold;
             margin-bottom: 10px;
         }
-
+        
         #uploadedImageContainer {
             display: none; /* Hide the container by default */
         }
-
+        
         #uploadedImage {
             max-width: 100%;
-            height: auto;
+            height: 100px;
         }
     </style>
 </head>
