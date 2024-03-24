@@ -8,7 +8,7 @@ import os
 import cv2
 import pickle
 from flask import Flask, render_template, request, redirect, url_for
-import os
+import os# 
 
 app = Flask(__name__)
 UPLOAD_FOLDER = 'uploads'
@@ -47,8 +47,9 @@ def uploaded_file(filename):
     full_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
     pic = np.array([preprocess_image(full_path)])
     y_pred = loaded_knn.predict(pic)
-    print(y_pred)
-    return str(y_pred)
+    print("TESTING")
+    print(type(y_pred[0]))
+    return str(y_pred[0])
     
     #return testing()
     #return f'Image {filename} uploaded successfully.'
