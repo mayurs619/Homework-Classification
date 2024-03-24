@@ -19,6 +19,7 @@ import keras
 app = Flask(__name__)
 UPLOAD_FOLDER = 'uploads'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+loaded_cnn = keras.models.load_model('cnn_classifier_128.keras')
 
 # Function to check if the uploaded file is allowed
 def allowed_file(filename):
@@ -58,7 +59,6 @@ def upload_file():
     return jsonify({'predictions': predictions, 'image_data_list': image_data_list})
 
 def predict_image(image_path):
-    loaded_cnn = keras.models.load_model('cnn_classifier_128.keras')
     pic = np.array([preprocess_image(image_path)])
     y_pred = loaded_cnn.predict(pic)
     return y_pred[0][0]
