@@ -1,6 +1,6 @@
 import numpy as np
 from flask import Flask, render_template, request, jsonify
-from skimage import io, color, transform
+from skimage import io, color
 import os
 import cv2
 import pickle
@@ -12,7 +12,7 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 # Function to check if the uploaded file is allowed
 def allowed_file(filename):
-    ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
+    ALLOWED_EXTENSIONS = {'jpg', 'jpeg'}
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 @app.route('/')
@@ -24,24 +24,31 @@ def upload_file():
     if 'file' not in request.files:
         return jsonify({'error': 'No file part'})
 
-    file = request.files['file']
-    
-    if file.filename == '':
-        return jsonify({'error': 'No selected file'})
+    files = request.files.getlist('file')  # Get list of files
 
-    if file and allowed_file(file.filename):
-        filename = file.filename
-        file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-        full_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-        pred = predict_image(full_path)
-        if(pred == "0.0"):
-            prediction = "Homework"
+    predictions = []
+    image_data_list = []
+
+    for file in files:
+        if file.filename == '':
+            continue
+
+        if allowed_file(file.filename):
+            filename = file.filename
+            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+            full_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            pred = predict_image(full_path)
+            if pred == "0.0":
+                prediction = "Homework"
+            else:
+                prediction = "Not Homework"
+            image_data = encode_image(full_path)
+            predictions.append(prediction)
+            image_data_list.append(image_data)
         else:
-            prediction = "Not Homework"
-        image_data = encode_image(full_path)
-        return jsonify({'prediction': prediction, 'image': image_data})
-    else:
-        return jsonify({'error': 'Invalid file format. Please upload an image (png, jpg, jpeg, gif)'})
+            return jsonify({'error': 'Invalid file format. Please upload images (jpg, jpeg).'}) 
+
+    return jsonify({'predictions': predictions, 'image_data_list': image_data_list})
 
 def predict_image(image_path):
     loaded_knn = pickle.load(open('knn_classifier.pkl', 'rb'))

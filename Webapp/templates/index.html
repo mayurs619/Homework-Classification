@@ -71,87 +71,93 @@
             margin-top: 20px;
         }
         
-        #prediction {
-            font-weight: bold;
-            margin-bottom: 10px;
+        .card {
+            width: calc(33.33% - 20px); 
+            margin: 10px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            display: inline-block;
+            vertical-align: top;
         }
         
-        #uploadedImageContainer {
-            display: none; /* Hide the container by default */
+        .card img {
+            width: 100%;
+            height: auto;
+            display: block;
         }
         
-        #uploadedImage {
-            max-width: 100%;
-            height: 100px;
+        /* Styles for small devices (up to 600px) */
+        @media only screen and (max-width: 600px) {
+            .card {
+                width: calc(50% - 20px); /* Two cards in a row */
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Upload Image</h1>
+        <h1>Upload Images</h1>
         <div class="upload-section">
-            <label for="fileInput" class="file-label">Choose file</label>
-            <input type="file" id="fileInput">
+            <label for="fileInput" class="file-label">Choose file(s)</label>
+            <input type="file" id="fileInput" multiple> <!-- Allow multiple file selection -->
             <button id="uploadBtn">Upload</button>
         </div>
-        <div class="result-container">
-            <div id="prediction"></div>
-            <div id="uploadedImageContainer">
-                <img id="uploadedImage" src="" alt="Uploaded Image">
-            </div>
-        </div>
         <div id="error"></div> <!-- Display error message here -->
+        <div class="result-container" id="imageCardsContainer">
+            <!-- Image cards will be dynamically added here -->
+        </div>
     </div>
-
     <script>
         $(document).ready(function(){
             $('#uploadBtn').click(function(){
-                var fileInput = document.getElementById('fileInput');
-                var file = fileInput.files[0];
-                var formData = new FormData();
-                formData.append('file', file);
-                
-                // Check if a file is selected
-                if (!file) {
-                    $('#error').text('Please select a file.');
-                    $('#prediction').text('');
-                    $('#uploadedImageContainer').hide();
-                    return;
-                }
-
-                // Check file type
-                var fileType = file.type.split('/').pop();
-                if (fileType !== 'png' && fileType !== 'jpg' && fileType !== 'jpeg' && fileType !== 'gif') {
-                    $('#error').text('Invalid file format. Please upload an image (png, jpg, jpeg, heic).');
-                    $('#prediction').text('');
-                    $('#uploadedImageContainer').hide();
-                    return;
-                }
-                $.ajax({
-                    url: '/upload',
-                    type: 'POST',
-                    data: formData,
-                    contentType: false,
-                    processData: false,
-                    success: function(response){
-                        // Display prediction
-                        $('#prediction').text('Prediction: ' + response.prediction);
-                        $('#error').text('');
-                        
-                        // Display uploaded image
-                        $('#uploadedImage').attr('src', 'data:image/jpeg;base64,' + response.image);
-                        $('#uploadedImageContainer').show(); // Show the image container
-                    },
-                    error: function(xhr, status, error){
-                        var errorMessage = xhr.responseJSON.error;
-                        $('#prediction').text('');
-                        $('#error').text(errorMessage);
-                        $('#uploadedImage').attr('src', ''); // Clear image src on error
-                        $('#uploadedImageContainer').hide(); // Hide the image container on error
+                var files = document.getElementById('fileInput').files; // Get the list of selected files
+    
+                // Iterate through each file
+                for (var i = 0; i < files.length; i++) {
+                    var file = files[i];
+                    var formData = new FormData();
+                    formData.append('file', file);
+                    
+                    // Check if a file is selected
+                    if (!file) {
+                        $('#error').text('Please select a file.');
+                        return;
                     }
-                });
+    
+                    // Check file type
+                    var fileType = file.type.split('/').pop();
+                    if (fileType !== 'png' && fileType !== 'jpg' && fileType !== 'jpeg' && fileType !== 'gif') {
+                        $('#error').text('Invalid file format. Please upload an image (png, jpg, jpeg, heic).');
+                        return;
+                    }
+    
+                    // Send file to the server for processing
+                    $.ajax({
+                        url: '/upload',
+                        type: 'POST',
+                        data: formData,
+                        contentType: false,
+                        processData: false,
+                        success: function(response){
+                            for (var i = 0; i < response.predictions.length; i++) {
+                                // Display prediction and image
+                                var card = $('<div class="card"></div>');
+                                var img = $('<img>').attr('src', 'data:image/jpeg;base64,' + response.image_data_list[i]);
+                                var prediction = $('<div>').text('Prediction: ' + response.predictions[i]);
+                                card.append(img, prediction);
+                                $('#imageCardsContainer').append(card);
+                            }
+                        },
+                        error: function(xhr, status, error){
+                            var errorMessage = xhr.responseJSON.error;
+                            $('#error').text(errorMessage);
+                        }
+                    });
+                }
             });
         });
     </script>
+    
 </body>
 </html>
