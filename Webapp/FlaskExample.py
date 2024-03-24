@@ -6,6 +6,16 @@ import cv2
 import pickle
 import base64
 
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score, confusion_matrix, ConfusionMatrixDisplay, classification_report
+import matplotlib.pyplot as plt
+
+
+import tensorflow as tf
+from tensorflow.keras import layers, models
+import keras
+
+
 app = Flask(__name__)
 UPLOAD_FOLDER = 'uploads'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
@@ -52,6 +62,7 @@ def upload_file():
 
 def predict_image(image_path):
     loaded_knn = pickle.load(open('knn_classifier.pkl', 'rb'))
+    #loaded_cnn = keras.models.load_model('cnn_classifier_128.keras')
     pic = np.array([preprocess_image(image_path)])
     y_pred = loaded_knn.predict(pic)
     return str(y_pred[0])
